@@ -4,7 +4,6 @@
 state:
   bucket: example-org-terraform-state
   region: eu-west-1
-  lock_table: terraform-locks
   kms_alias: alias/example-org-terraform-state
 
 environments:

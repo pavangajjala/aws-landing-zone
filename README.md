@@ -36,7 +36,7 @@ flowchart TB
 | --- | --- |
 | `modules/organization` | Organization, OUs, member accounts, service control policies |
 | `modules/identity-center` | Permission sets, groups and account assignments |
-| `modules/state-backend` | Encrypted, versioned S3 bucket and DynamoDB lock table |
+| `modules/state-backend` | Encrypted, versioned S3 bucket for state, locked with S3 lock files |
 | `modules/account-baseline` | Password policy, S3 public access block, EBS encryption, Access Analyzer, GitHub OIDC deploy role |
 | `modules/network` | VPC across three AZs, public and private subnets, NAT, flow logs |
 | `live/management` | Root configuration for the management account |
@@ -67,14 +67,14 @@ leaving the organization, disabling CloudTrail, Config or GuardDuty, using the
 root user, or creating resources outside the allowed regions.
 
 **Things that must not be deleted say so.** Accounts and the state bucket have
-`prevent_destroy`, and the lock table has point-in-time recovery.
+`prevent_destroy`, and the bucket keeps 90 days of old state versions.
 
 More detail, including the access model and trade-offs, is in
 [docs/architecture.md](docs/architecture.md).
 
 ## Usage
 
-Requires Terraform 1.6 or newer, Python 3.9 or newer and credentials for the
+Requires Terraform 1.10 or newer, Python 3.9 or newer and credentials for the
 organization's management account.
 
 ```bash

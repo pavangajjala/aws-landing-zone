@@ -68,8 +68,9 @@ attached to a transit gateway later.
 
 All state lives in one bucket in the management account, one key per
 environment (`<environment>/terraform.tfstate`). The bucket is versioned,
-encrypted with a dedicated KMS key and rejects non-TLS requests. Locks are
-held in DynamoDB.
+encrypted with a dedicated KMS key and rejects non-TLS requests. Locking uses
+S3 lock files (`use_lockfile`, Terraform 1.10+), so there is no DynamoDB table
+to create, pay for or keep in sync.
 
 ### Bootstrapping
 

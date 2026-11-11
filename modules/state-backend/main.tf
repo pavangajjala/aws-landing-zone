@@ -127,24 +127,3 @@ resource "aws_s3_bucket_policy" "state" {
 
   depends_on = [aws_s3_bucket_public_access_block.state]
 }
-
-resource "aws_dynamodb_table" "locks" {
-  name         = var.lock_table_name
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-  tags         = var.tags
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-
-  point_in_time_recovery {
-    enabled = true
-  }
-
-  server_side_encryption {
-    enabled     = true
-    kms_key_arn = aws_kms_key.state.arn
-  }
-}

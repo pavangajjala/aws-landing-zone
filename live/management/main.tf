@@ -30,8 +30,7 @@ module "organization" {
 module "state_backend" {
   source = "../../modules/state-backend"
 
-  bucket_name     = "${var.org_prefix}-terraform-state"
-  lock_table_name = "terraform-locks"
+  bucket_name = "${var.org_prefix}-terraform-state"
 }
 
 module "identity_center" {

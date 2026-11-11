@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import gen_backend  # noqa: E402
 
 CONFIG = {
-    "state": {"bucket": "acme-state", "region": "eu-west-1", "lock_table": "locks", "kms_alias": "alias/acme"},
+    "state": {"bucket": "acme-state", "region": "eu-west-1", "kms_alias": "alias/acme"},
     "environments": {
         "dev": {"root": "live/workload"},
         "prod": {"root": "live/workload"},
@@ -19,8 +19,10 @@ CONFIG = {
 
 def test_render_uses_environment_name_as_state_key():
     text = gen_backend.render("dev", CONFIG["state"])
-    assert 'key            = "dev/terraform.tfstate"' in text
-    assert 'kms_key_id     = "alias/acme"' in text
+    assert 'key          = "dev/terraform.tfstate"' in text
+    assert 'kms_key_id   = "alias/acme"' in text
+    assert "use_lockfile = true" in text
+    assert "dynamodb_table" not in text
     assert text.startswith("# Generated")
 
 
@@ -52,9 +54,9 @@ def test_unknown_environment_is_rejected(tmp_path):
 
 @pytest.mark.parametrize("body", [
     "environments: {dev: {root: live/x}}",                                  # no state block
-    "state: {bucket: b, region: r, lock_table: t}",                         # no environments
-    "state: {bucket: b, region: r, lock_table: t}\nenvironments: {Dev!: {root: x}}",
-    "state: {bucket: b, region: r, lock_table: t}\nenvironments: {dev: {}}",
+    "state: {bucket: b, region: r}",                         # no environments
+    "state: {bucket: b, region: r}\nenvironments: {Dev!: {root: x}}",
+    "state: {bucket: b, region: r}\nenvironments: {dev: {}}",
 ])
 def test_invalid_config_is_rejected(tmp_path, body):
     path = tmp_path / "environments.yaml"
