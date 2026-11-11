@@ -1,0 +1,18 @@
+# Single source of truth for where each environment keeps its state.
+# scripts/gen_backend.py turns this into one backend config per environment,
+# so nobody edits bucket names or state keys by hand.
+state:
+  bucket: example-org-terraform-state
+  region: eu-west-1
+  lock_table: terraform-locks
+  kms_alias: alias/example-org-terraform-state
+
+environments:
+  management:
+    root: live/management
+  dev:
+    root: live/workload
+    var_file: envs/dev.tfvars
+  prod:
+    root: live/workload
+    var_file: envs/prod.tfvars

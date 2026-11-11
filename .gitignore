@@ -6,7 +6,7 @@ tfplan
 plan.json
 crash.log
 # Generated per environment by scripts/gen_backend.py
-backend.hcl
+live/**/backend/
 # Module lock files are not useful; root modules commit theirs.
 modules/**/.terraform.lock.hcl
 __pycache__/
