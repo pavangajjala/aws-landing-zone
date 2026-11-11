@@ -1,0 +1,67 @@
+name: Terraform
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Format, backend configs and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Formatting
+        run: terraform fmt -check -recursive -diff
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: pip install pytest pyyaml
+
+      - name: Backend configs match environments.yaml
+        run: python scripts/gen_backend.py --check
+
+      - name: Unit tests
+        run: python -m pytest -q tests
+
+  validate:
+    name: Validate ${{ matrix.dir }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - modules/organization
+          - modules/identity-center
+          - modules/state-backend
+          - modules/account-baseline
+          - modules/network
+          - live/management
+          - live/workload
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Init without a backend
+        run: terraform -chdir=${{ matrix.dir }} init -backend=false -input=false
+
+      - name: Validate
+        run: terraform -chdir=${{ matrix.dir }} validate
